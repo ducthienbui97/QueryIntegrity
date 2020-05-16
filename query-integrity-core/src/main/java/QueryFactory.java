@@ -16,7 +16,7 @@ public interface QueryFactory<T> {
      *
      * @param queryProxy the proxy query that need to be converted to
      *                   native system under test's query.
-     * @return query for system under test.
+     * @return query for system under test.!
      */
     public T build(QueryProxy<T> queryProxy);
 }
