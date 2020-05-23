@@ -1,6 +1,9 @@
+package io.github.ducthienbui97.queryintegration.core;
+
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Random;
 import java.util.function.BiFunction;
@@ -13,11 +16,16 @@ public class QueryTestingService<T, R> {
     public final int DEFAULT_MIN_LEAF = 1;
     private final QueryFactory<T, R> queryFactory;
     private final ResultValidator<R> resultValidator;
-    private Random random = new Random();
+    private final Random random = new Random();
     @Setter
     private int maxLeafCount = DEFAULT_MAX_LEAF;
     @Setter
-    private int minLeafCount = 1;
+    private int minLeafCount = DEFAULT_MIN_LEAF;
+
+    public QueryTestingService(QueryFactory<T, R> queryFactory) {
+        this(queryFactory, new ResultValidator<R>() {
+        });
+    }
 
     public QueryTestingService(QueryFactory<T, R> queryFactory, ResultValidator<R> resultValidator) {
         this.queryFactory = queryFactory;
@@ -35,7 +43,7 @@ public class QueryTestingService<T, R> {
                         .children(Collections.singletonList(queryProxy.reverse()))
                         .build(),
                 resultValidator::isEquals,
-                "Result of query {} is not equal to query {}\n Expected {} is equal to {}");
+                "Result of query {} not equal to query {}\n Expected {} equal to {}");
         log.info("Equal test: {} out of {} queries is invalid", invalid, testCount);
         return invalid;
     }
@@ -48,8 +56,8 @@ public class QueryTestingService<T, R> {
         log.info("Starting not test:");
         int invalid = runTest(testCount,
                 QueryProxy::reverse,
-                resultValidator::isIntersected,
-                "Result of query {} is equal to query {}\n Expected {} is not equal to {}");
+                (result1, result2) -> !resultValidator.isIntersected(result1, result2),
+                "Result of query {} shares a nonempty subset with query {}\n Expected {} not intersect with {}");
         log.info("Not test: {} out of {} queries is invalid", invalid, testCount);
         return invalid;
     }
@@ -73,16 +81,18 @@ public class QueryTestingService<T, R> {
         return invalid;
     }
 
-    private int runTest(int testCount, Function<QueryProxy<T>, QueryProxy<T>> transform,
-                        BiFunction<R, R, Boolean> validator, String logString) {
+    private int runTest(int testCount,
+                        Function<QueryProxy<T>, QueryProxy<T>> transform,
+                        BiFunction<Collection<R>, Collection<R>, Boolean> validator,
+                        String logString) {
         int invalid = 0;
         for (int i = 0; i < testCount; i++) {
             QueryProxy<T> queryProxy1 = buildQuery();
             QueryProxy<T> queryProxy2 = transform.apply(queryProxy1);
             T query1 = queryFactory.build(queryProxy1);
             T query2 = queryFactory.build(queryProxy2);
-            R result1 = queryFactory.getResult(query1);
-            R result2 = queryFactory.getResult(query2);
+            Collection<R> result1 = queryFactory.getResult(query1);
+            Collection<R> result2 = queryFactory.getResult(query2);
             boolean valid = validator.apply(result1, result2);
             if (!valid) {
                 invalid++;

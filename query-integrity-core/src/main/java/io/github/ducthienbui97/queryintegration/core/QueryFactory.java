@@ -1,3 +1,7 @@
+package io.github.ducthienbui97.queryintegration.core;
+
+import java.util.Collection;
+
 /**
  * Query Factory create query for a query test.
  *
@@ -27,7 +31,7 @@ public interface QueryFactory<T, R> {
      * @param query the query to be used to get the result.
      * @return the result of input query.
      */
-    public R getResult(T query);
+    public Collection<R> getResult(T query);
 
     /**
      * Convert result or query to readable string
