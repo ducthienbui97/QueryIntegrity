@@ -8,7 +8,9 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>query-integrity-core</artifactId>
+    <artifactId>query-integration-core</artifactId>
+    <name>${project.groupId}:${project.artifactId}</name>
+    <description>Core framework for query integration check</description>
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
