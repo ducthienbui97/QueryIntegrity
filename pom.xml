@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.github.ducthienbui97</groupId>
-    <artifactId>QueryIntegration</artifactId>
+    <artifactId>QueryIntegrity</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <modules>
         <module>query-integrity-core</module>
-        <module>mongo-integration</module>
+        <module>mongodb-integration</module>
     </modules>
     <url>https://github.com/ducthienbui97/</url>
     <licenses>

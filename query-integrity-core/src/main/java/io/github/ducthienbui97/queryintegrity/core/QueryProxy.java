@@ -1,4 +1,4 @@
-package io.github.ducthienbui97.queryintegration.core;
+package io.github.ducthienbui97.queryintegrity.core;
 
 import lombok.Builder;
 import lombok.Data;

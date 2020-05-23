@@ -8,10 +8,19 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>query-integrity-core</artifactId>
+    <artifactId>mongodb-integration</artifactId>
     <name>${project.groupId}:${project.artifactId}</name>
-    <description>Core framework for query integrity check</description>
+    <description>Query integrity check for MongoDB</description>
     <dependencies>
+        <dependency>
+            <groupId>io.github.ducthienbui97</groupId>
+            <artifactId>query-integrity-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongo-java-driver</artifactId>
+            <version>3.12.1</version>
+        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -45,4 +54,5 @@
             <artifactId>mockito-junit-jupiter</artifactId>
         </dependency>
     </dependencies>
+
 </project>
