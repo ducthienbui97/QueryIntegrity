@@ -1,13 +1,18 @@
+package io.github.ducthienbui97.queryintegration.core;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.mockito.stubbing.OngoingStubbing;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -23,13 +28,14 @@ public class QueryTestingServiceTest {
     @Mock
     private QueryFactory<String, String> queryFactory;
 
-    @InjectMocks
     private QueryTestingService<String, String> queryTestingService;
 
     @BeforeEach
     public void setup() {
+        queryTestingService = new QueryTestingService<>(queryFactory, resultValidator);
         when(queryFactory.build(any())).thenReturn("test");
         when(queryFactory.build()).thenReturn("test");
+        when(queryFactory.toString(any())).thenCallRealMethod();
         when(resultValidator.isEquals(any(), any())).thenReturn(true);
         when(resultValidator.isIntersected(any(), any())).thenReturn(true);
         when(resultValidator.isSubset(any(), any())).thenReturn(true);
@@ -126,7 +132,7 @@ public class QueryTestingServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {1, 5, 10})
+    @ValueSource(ints = {10, 100, 1000})
     public void testInvalidReportEqualTest(int invalidCount) {
         OngoingStubbing<Boolean> stubbing = when(resultValidator.isEquals(any(), any()));
         for (int i = 0; i < invalidCount; i++) {
@@ -138,19 +144,19 @@ public class QueryTestingServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {1, 5, 10})
+    @ValueSource(ints = {10, 100, 100})
     public void testInvalidReportNotTest(int invalidCount) {
         OngoingStubbing<Boolean> stubbing = when(resultValidator.isIntersected(any(), any()));
         for (int i = 0; i < invalidCount; i++) {
-            stubbing = stubbing.thenReturn(false);
+            stubbing = stubbing.thenReturn(true);
         }
-        stubbing.thenReturn(true);
+        stubbing.thenReturn(false);
         assertThat(queryTestingService.runNotTest(), is(invalidCount));
         verify(resultValidator, times(queryTestingService.DEFAULT_TEST_COUNT)).isIntersected(any(), any());
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {1, 5, 10})
+    @ValueSource(ints = {10, 100, 100})
     public void testInvalidReportSubsetTest(int invalidCount) {
         OngoingStubbing<Boolean> stubbing = when(resultValidator.isSubset(any(), any()));
         for (int i = 0; i < invalidCount; i++) {
@@ -159,5 +165,53 @@ public class QueryTestingServiceTest {
         stubbing.thenReturn(true);
         assertThat(queryTestingService.runSubsetTest(), is(invalidCount));
         verify(resultValidator, times(queryTestingService.DEFAULT_TEST_COUNT)).isSubset(any(), any());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {10, 100, 1000})
+    public void testDefaultResultValidatorIsEquals(int inValidCount) {
+        OngoingStubbing<Collection<String>> stubbing = when(queryFactory.getResult(any()));
+        for (int i = 0; i < inValidCount; i++) {
+            stubbing = stubbing.thenReturn(Collections.singletonList("unMatched1"))
+                    .thenReturn(Collections.singletonList("unMatched2"));
+        }
+        stubbing.thenReturn(Collections.emptyList());
+        queryTestingService = new QueryTestingService<>(queryFactory);
+        assertThat(queryTestingService.runEqualTest(), is(inValidCount));
+        verify(queryFactory, times(queryTestingService.DEFAULT_TEST_COUNT * 2)).getResult(any());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {10, 100, 1000})
+    public void testDefaultResultValidatorIsIntersected(int inValidCount) {
+        OngoingStubbing<Collection<String>> stubbing = when(queryFactory.getResult(any()));
+        for (int i = 0; i < queryTestingService.DEFAULT_TEST_COUNT; i++) {
+            stubbing = stubbing.thenReturn(Arrays.asList("test1", "test2", "test3"));
+            if (i >= inValidCount) {
+                stubbing = stubbing.thenReturn(Arrays.asList("test5", "test6", "test7"));
+            } else {
+                stubbing = stubbing.thenReturn(Arrays.asList("test2", "test3", "test4"));
+            }
+        }
+        queryTestingService = new QueryTestingService<>(queryFactory);
+        assertThat(queryTestingService.runNotTest(), is(inValidCount));
+        verify(queryFactory, times(queryTestingService.DEFAULT_TEST_COUNT * 2)).getResult(any());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {10, 100, 1000})
+    public void testDefaultResultValidatorIsSubset(int inValidCount) {
+        OngoingStubbing<Collection<String>> stubbing = when(queryFactory.getResult(any()));
+        for (int i = 0; i < queryTestingService.DEFAULT_TEST_COUNT; i++) {
+            stubbing = stubbing.thenReturn(Arrays.asList("test1", "test2", "test3"));
+            if (i >= inValidCount) {
+                stubbing = stubbing.thenReturn(Arrays.asList("test3", "test2", "test1"));
+            } else {
+                stubbing = stubbing.thenReturn(Arrays.asList("test2", "test3", "test7"));
+            }
+        }
+        queryTestingService = new QueryTestingService<>(queryFactory);
+        assertThat(queryTestingService.runSubsetTest(), is(inValidCount));
+        verify(queryFactory, times(queryTestingService.DEFAULT_TEST_COUNT * 2)).getResult(any());
     }
 }

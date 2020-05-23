@@ -1,3 +1,5 @@
+package io.github.ducthienbui97.queryintegration.core;
+
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
