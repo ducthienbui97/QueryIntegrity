@@ -48,12 +48,6 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.5</version>
-                <configuration>
-                    <!-- Sets the path to the file which contains the execution data. -->
-                    <dataFile>target/jacoco.exec</dataFile>
-                    <!-- Sets the output directory for the code coverage report. -->
-                    <outputDirectory>target/jacoco-ut</outputDirectory>
-                </configuration>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -87,7 +81,7 @@
                                         <limit implementation="org.jacoco.report.check.Limit">
                                             <counter>INSTRUCTION</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.85</minimum>
+                                            <minimum>0.95</minimum>
                                         </limit>
                                     </limits>
                                 </rule>
@@ -106,10 +100,20 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.github.ducthienbui97</groupId>
+                <artifactId>mongodb-integration</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>1.18.12</version>
                 <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>29.0-jre</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
