@@ -1,7 +1,5 @@
 package io.github.ducthienbui97.queryintegrity.core;
 
-import lombok.NonNull;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -20,11 +18,9 @@ public interface ResultValidator<R> {
      * @param result2 the second result
      * @return true if 2 results are equal
      */
-    default public boolean isEquals(@NonNull Collection<R> result1, @NonNull Collection<R> result2) {
+    default public boolean isEquals(Collection<R> result1, Collection<R> result2) {
         return result1.equals(result2);
     }
-
-    ;
 
     /**
      * Check if result of 2 queries are intersected,
@@ -34,7 +30,7 @@ public interface ResultValidator<R> {
      * @param result2 the second result
      * @return true if 2 results share an non empty subset.
      */
-    default public boolean isIntersected(@NonNull Collection<R> result1, @NonNull Collection<R> result2) {
+    default public boolean isIntersected(Collection<R> result1, Collection<R> result2) {
         Set<R> resultSet1 = new HashSet<>(result1);
         resultSet1.retainAll(result2);
         return !resultSet1.isEmpty();
@@ -47,7 +43,7 @@ public interface ResultValidator<R> {
      * @param result2 the result could be superset
      * @return true if result1 is the subset of result2
      */
-    default public boolean isSubset(@NonNull Collection<R> result1, @NonNull Collection<R> result2) {
+    default public boolean isSubset(Collection<R> result1, Collection<R> result2) {
         return result2.containsAll(result1);
     }
 }
