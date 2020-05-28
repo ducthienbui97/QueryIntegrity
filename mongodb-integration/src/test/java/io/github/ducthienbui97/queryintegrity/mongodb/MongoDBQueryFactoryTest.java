@@ -350,7 +350,7 @@ public class MongoDBQueryFactoryTest {
                 .build();
     }
 
-    private static class Backend extends MemoryBackend {
+    protected static class Backend extends MemoryBackend {
         @Override
         // Override to make this public
         public synchronized MongoDatabase resolveDatabase(String database) {
