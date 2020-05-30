@@ -45,16 +45,18 @@ public class MongoDBQueryTestingCLITest {
         ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
         listAppender.start();
         logger.addAppender(listAppender);
-        new CommandLine(new MongoDBQueryTestingCLI()).execute(
+        MongoDBQueryTestingCLI.main(new String[]{
                 "-db=" + DATABASE_NAME,
                 "-c=" + COLLECTION_NAME,
                 "-u=" + mongoURI,
                 "-f=" + jsonFilePath,
-                "--subset");
+                "--subset"
+        });
         List<ILoggingEvent> logsList = listAppender.list;
-        assertThat(logsList, hasItem(loggingEventMatcher(not(containsString("Not test")))));
-        assertThat(logsList, hasItem(loggingEventMatcher(not(containsString("Equal test")))));
-        assertThat(logsList, hasItem(loggingEventMatcher(containsString("Subset test"))));
+        assertThat(logsList, allOf(
+                not(hasItem(loggingEventMatcher(containsString("Not test")))),
+                not(hasItem(loggingEventMatcher(containsString("Equal test")))),
+                hasItem(loggingEventMatcher(containsString("Subset test")))));
     }
 
     @Test
@@ -63,16 +65,18 @@ public class MongoDBQueryTestingCLITest {
         ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
         listAppender.start();
         logger.addAppender(listAppender);
-        new CommandLine(new MongoDBQueryTestingCLI()).execute(
+        MongoDBQueryTestingCLI.main(new String[]{
                 "-db=" + DATABASE_NAME,
                 "-c=" + COLLECTION_NAME,
                 "-u=" + mongoURI,
                 "-f=" + jsonFilePath,
-                "--not");
+                "--not"
+        });
         List<ILoggingEvent> logsList = listAppender.list;
-        assertThat(logsList, hasItem(loggingEventMatcher(containsString("Not test"))));
-        assertThat(logsList, hasItem(loggingEventMatcher(not(containsString("Equal test")))));
-        assertThat(logsList, hasItem(loggingEventMatcher(not(containsString("Subset test")))));
+        assertThat(logsList, allOf(
+                hasItem(loggingEventMatcher(containsString("Not test"))),
+                not(hasItem(loggingEventMatcher(containsString("Equal test")))),
+                not(hasItem(loggingEventMatcher(containsString("Subset test"))))));
     }
 
     @Test
@@ -81,16 +85,19 @@ public class MongoDBQueryTestingCLITest {
         ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
         listAppender.start();
         logger.addAppender(listAppender);
-        new CommandLine(new MongoDBQueryTestingCLI()).execute(
+        MongoDBQueryTestingCLI.main(new String[]{
                 "-db=" + DATABASE_NAME,
                 "-c=" + COLLECTION_NAME,
                 "-u=" + mongoURI,
                 "-f=" + jsonFilePath,
-                "--equal");
+                "--equal"
+        });
         List<ILoggingEvent> logsList = listAppender.list;
-        assertThat(logsList, hasItem(loggingEventMatcher(not(containsString("Not test")))));
-        assertThat(logsList, hasItem(loggingEventMatcher(containsString("Equal test"))));
-        assertThat(logsList, hasItem(loggingEventMatcher(not(containsString("Subset test")))));
+        assertThat(logsList, allOf(
+                not(hasItem(loggingEventMatcher(containsString("Not test")))),
+                hasItem(loggingEventMatcher(containsString("Equal test"))),
+                not(hasItem(loggingEventMatcher(containsString("Subset test"))))
+        ));
     }
 
     @Test
@@ -99,16 +106,18 @@ public class MongoDBQueryTestingCLITest {
         ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
         listAppender.start();
         logger.addAppender(listAppender);
-        new CommandLine(new MongoDBQueryTestingCLI()).execute(
+        MongoDBQueryTestingCLI.main(new String[]{
                 "-db=" + DATABASE_NAME,
                 "-c=" + COLLECTION_NAME,
                 "-u=" + mongoURI,
                 "-f=" + jsonFilePath,
-                "-e", "-n", "-s");
+                "-e", "-n", "-s"
+        });
         List<ILoggingEvent> logsList = listAppender.list;
-        assertThat(logsList, hasItem(loggingEventMatcher(containsString("Not test"))));
-        assertThat(logsList, hasItem(loggingEventMatcher(containsString("Equal test"))));
-        assertThat(logsList, hasItem(loggingEventMatcher(containsString("Subset test"))));
+        assertThat(logsList, allOf(
+                hasItem(loggingEventMatcher(containsString("Not test"))),
+                hasItem(loggingEventMatcher(containsString("Equal test"))),
+                hasItem(loggingEventMatcher(containsString("Subset test")))));
     }
 
     @Test
@@ -117,12 +126,11 @@ public class MongoDBQueryTestingCLITest {
         ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
         listAppender.start();
         logger.addAppender(listAppender);
-        new CommandLine(new MongoDBQueryTestingCLI()).execute(
-                "-db=" + DATABASE_NAME,
+        MongoDBQueryTestingCLI.main(new String[]{"-db=" + DATABASE_NAME,
                 "-c=" + COLLECTION_NAME,
                 "-u=" + mongoURI,
                 "-f=" + jsonFilePath,
-                "-e", "-n", "-s");
+                "-e", "-n", "-s"});
         List<ILoggingEvent> logsList = listAppender.list;
         assertThat(logsList, hasItem(loggingEventMatcher(containsString("connected"))));
     }

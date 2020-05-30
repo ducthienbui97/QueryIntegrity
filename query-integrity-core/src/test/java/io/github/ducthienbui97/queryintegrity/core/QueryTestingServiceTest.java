@@ -42,42 +42,42 @@ public class QueryTestingServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {10, 15, 1, 20})
+    @ValueSource(ints = {1, 5, 10})
     public void testEveryEqualRunTwoQueriesAreBuild(int runTime) {
         queryTestingService.runEqualTest(runTime);
         verify(queryFactory, times(runTime * 2)).build(any(QueryProxy.class));
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {10, 15, 1, 20})
+    @ValueSource(ints = {1, 5, 10})
     public void testEveryNotRunTwoQueriesAreBuild(int runTime) {
         queryTestingService.runNotTest(runTime);
         verify(queryFactory, times(runTime * 2)).build(any(QueryProxy.class));
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {10, 15, 1, 20})
+    @ValueSource(ints = {1, 5, 10})
     public void testEverySubsetRunTwoQueriesAreBuild(int runTime) {
         queryTestingService.runSubsetTest(runTime);
         verify(queryFactory, times(runTime * 2)).build(any(QueryProxy.class));
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {10, 15, 1, 20})
+    @ValueSource(ints = {1, 5, 10})
     public void testEqualTestValidateEveryRun(int runTime) {
         queryTestingService.runEqualTest(runTime);
         verify(resultValidator, times(runTime)).isEquals(any(), any());
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {10, 15, 1, 20})
+    @ValueSource(ints = {1, 5, 10})
     public void testNotTestValidateEveryRun(int runTime) {
         queryTestingService.runNotTest(runTime);
         verify(resultValidator, times(runTime)).isIntersected(any(), any());
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {10, 15, 1, 20})
+    @ValueSource(ints = {1, 5, 10})
     public void testSubsetTestValidateEveryRun(int runTime) {
         queryTestingService.runSubsetTest(runTime);
         verify(resultValidator, times(runTime)).isSubset(any(), any());
@@ -86,6 +86,7 @@ public class QueryTestingServiceTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 5, 10})
     public void testMinLeafNodeEqualTest(int leaf) {
+        queryTestingService.setMaxLeafCount(5);
         queryTestingService.setMinLeafCount(leaf);
         queryTestingService.runEqualTest();
         verify(queryFactory, atLeast(queryTestingService.DEFAULT_TEST_COUNT * leaf)).build();
@@ -94,6 +95,7 @@ public class QueryTestingServiceTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 5, 10})
     public void testMinLeafNodeNotTest(int leaf) {
+        queryTestingService.setMaxLeafCount(5);
         queryTestingService.setMinLeafCount(leaf);
         queryTestingService.runNotTest();
         verify(queryFactory, atLeast(queryTestingService.DEFAULT_TEST_COUNT * leaf)).build();
@@ -102,6 +104,7 @@ public class QueryTestingServiceTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 5, 10})
     public void testMinLeafNodeSubsetTest(int leaf) {
+        queryTestingService.setMaxLeafCount(5);
         queryTestingService.setMinLeafCount(leaf);
         queryTestingService.runSubsetTest();
         verify(queryFactory, atLeast(2 * queryTestingService.DEFAULT_TEST_COUNT * leaf)).build();
@@ -110,6 +113,7 @@ public class QueryTestingServiceTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 5, 10})
     public void testMaxLeafNodeEqualTest(int leaf) {
+        queryTestingService.setMinLeafCount(5);
         queryTestingService.setMaxLeafCount(leaf);
         queryTestingService.runEqualTest();
         verify(queryFactory, atMost(queryTestingService.DEFAULT_TEST_COUNT * leaf)).build();
@@ -118,6 +122,7 @@ public class QueryTestingServiceTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 5, 10})
     public void testMaxLeafNodeNotTest(int leaf) {
+        queryTestingService.setMinLeafCount(5);
         queryTestingService.setMaxLeafCount(leaf);
         queryTestingService.runNotTest();
         verify(queryFactory, atMost(queryTestingService.DEFAULT_TEST_COUNT * leaf)).build();
@@ -126,13 +131,14 @@ public class QueryTestingServiceTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 5, 10})
     public void testMaxLeafNodeSubsetTest(int leaf) {
+        queryTestingService.setMinLeafCount(5);
         queryTestingService.setMaxLeafCount(leaf);
         queryTestingService.runSubsetTest();
         verify(queryFactory, atMost(2 * queryTestingService.DEFAULT_TEST_COUNT * leaf)).build();
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {10, 100, 1000})
+    @ValueSource(ints = {1, 5, 10})
     public void testInvalidReportEqualTest(int invalidCount) {
         OngoingStubbing<Boolean> stubbing = when(resultValidator.isEquals(any(), any()));
         for (int i = 0; i < invalidCount; i++) {
@@ -144,7 +150,7 @@ public class QueryTestingServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {10, 100, 100})
+    @ValueSource(ints = {1, 5, 10})
     public void testInvalidReportNotTest(int invalidCount) {
         OngoingStubbing<Boolean> stubbing = when(resultValidator.isIntersected(any(), any()));
         for (int i = 0; i < invalidCount; i++) {
@@ -156,7 +162,7 @@ public class QueryTestingServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {10, 100, 100})
+    @ValueSource(ints = {1, 5, 10})
     public void testInvalidReportSubsetTest(int invalidCount) {
         OngoingStubbing<Boolean> stubbing = when(resultValidator.isSubset(any(), any()));
         for (int i = 0; i < invalidCount; i++) {
@@ -168,8 +174,8 @@ public class QueryTestingServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {10, 100, 1000})
-    public void testDefaultResultValidatorIsEquals(int inValidCount) {
+    @ValueSource(ints = {1, 5, 10})
+    public void testUsingDefaultResultValidatorIsEquals(int inValidCount) {
         OngoingStubbing<Collection<String>> stubbing = when(queryFactory.getResult(any()));
         for (int i = 0; i < inValidCount; i++) {
             stubbing = stubbing.thenReturn(Collections.singletonList("unMatched1"))
@@ -182,8 +188,8 @@ public class QueryTestingServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {10, 100, 1000})
-    public void testDefaultResultValidatorIsIntersected(int inValidCount) {
+    @ValueSource(ints = {1, 5, 10})
+    public void testUsingDefaultResultValidatorIsIntersected(int inValidCount) {
         OngoingStubbing<Collection<String>> stubbing = when(queryFactory.getResult(any()));
         for (int i = 0; i < queryTestingService.DEFAULT_TEST_COUNT; i++) {
             stubbing = stubbing.thenReturn(Arrays.asList("test1", "test2", "test3"));
@@ -199,8 +205,8 @@ public class QueryTestingServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {10, 100, 1000})
-    public void testDefaultResultValidatorIsSubset(int inValidCount) {
+    @ValueSource(ints = {1, 5, 10})
+    public void testUsingDefaultResultValidatorIsSubset(int inValidCount) {
         OngoingStubbing<Collection<String>> stubbing = when(queryFactory.getResult(any()));
         for (int i = 0; i < queryTestingService.DEFAULT_TEST_COUNT; i++) {
             stubbing = stubbing.thenReturn(Arrays.asList("test1", "test2", "test3"));

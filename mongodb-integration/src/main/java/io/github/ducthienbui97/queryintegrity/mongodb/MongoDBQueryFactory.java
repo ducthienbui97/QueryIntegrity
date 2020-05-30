@@ -19,7 +19,6 @@ import org.bson.conversions.Bson;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -193,10 +192,7 @@ public class MongoDBQueryFactory implements QueryFactory<Bson, Document> {
                     String operator = fieldOption.getOperator();
                     Object[] methodParams = Stream.concat(Stream.of(fieldName), fieldOption.getParameters().stream()).toArray();
                     Optional<Bson> query = Arrays.stream(Filters.class.getMethods())
-                            .filter(method -> method.getName().equals(operator)
-                                    && Modifier.isPublic(method.getModifiers())
-                                    && Modifier.isStatic(method.getModifiers())
-                                    && Bson.class.isAssignableFrom(method.getReturnType()))
+                            .filter(method -> method.getName().equals(operator))
                             .map(method -> {
                                 try {
                                     return (Bson) method.invoke(null, methodParams);
@@ -239,7 +235,7 @@ public class MongoDBQueryFactory implements QueryFactory<Bson, Document> {
                         .map(this::build)
                         .collect(Collectors.toList()));
             case NOT:
-                return Filters.not(build(queryProxy.getChildren().get(0)));
+                return Filters.nor(build(queryProxy.getChildren().get(0)));
             default:
                 return queryProxy.getNativeQuery();
         }
@@ -247,6 +243,7 @@ public class MongoDBQueryFactory implements QueryFactory<Bson, Document> {
 
     @Override
     public Collection<Document> getResult(Bson query) {
+        log.debug("Sending {}", query);
         return Lists.newArrayList(collection.find(query));
     }
 }
