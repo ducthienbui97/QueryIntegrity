@@ -1,6 +1,5 @@
 package io.github.ducthienbui97.queryintegrity.core;
 
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collection;
@@ -11,15 +10,14 @@ import java.util.function.Function;
 
 @Slf4j
 public class QueryTestingService<T, R> {
-    public final int DEFAULT_TEST_COUNT = 1000;
-    public final int DEFAULT_MAX_LEAF = 10;
+    public final int DEFAULT_TEST_COUNT = 100;
+    public final int DEFAULT_MAX_LEAF = 5;
     public final int DEFAULT_MIN_LEAF = 1;
     private final QueryFactory<T, R> queryFactory;
     private final ResultValidator<R> resultValidator;
     private final Random random = new Random();
-    @Setter
+
     private int maxLeafCount = DEFAULT_MAX_LEAF;
-    @Setter
     private int minLeafCount = DEFAULT_MIN_LEAF;
 
     public QueryTestingService(QueryFactory<T, R> queryFactory) {
@@ -81,22 +79,41 @@ public class QueryTestingService<T, R> {
         return invalid;
     }
 
+    public void setMinLeafCount(int minLeafCount) {
+        this.minLeafCount = minLeafCount;
+        if (this.minLeafCount > this.maxLeafCount) {
+            setMaxLeafCount(minLeafCount);
+        }
+    }
+
+    public void setMaxLeafCount(int maxLeafCount) {
+        this.maxLeafCount = maxLeafCount;
+        if (this.maxLeafCount < minLeafCount) {
+            setMinLeafCount(maxLeafCount);
+        }
+    }
+
     private int runTest(int testCount,
                         Function<QueryProxy<T>, QueryProxy<T>> transform,
                         BiFunction<Collection<R>, Collection<R>, Boolean> validator,
-                        String logString) {
+                        String invalidLogString) {
         int invalid = 0;
         for (int i = 0; i < testCount; i++) {
+            log.debug("Building pair of queries number {}", i);
             QueryProxy<T> queryProxy1 = buildQuery();
             QueryProxy<T> queryProxy2 = transform.apply(queryProxy1);
+            log.debug("Proxy query 1: {} \nProxy query 2: {}", queryProxy1, queryProxy2);
             T query1 = queryFactory.build(queryProxy1);
             T query2 = queryFactory.build(queryProxy2);
+            log.debug("Native query 1: {}\nNative query 2: {}",
+                    queryFactory.toString(query1), queryFactory.toString(query2));
             Collection<R> result1 = queryFactory.getResult(query1);
             Collection<R> result2 = queryFactory.getResult(query2);
+            log.debug("Result 1 size: {} \n Result 2 size: {}", result1.size(), result2.size());
             boolean valid = validator.apply(result1, result2);
             if (!valid) {
                 invalid++;
-                log.error(logString,
+                log.error(invalidLogString,
                         queryFactory.toString(query1),
                         queryFactory.toString(query2),
                         queryFactory.toString(result1),

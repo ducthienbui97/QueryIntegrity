@@ -184,7 +184,7 @@ public class MongoDBQueryFactoryTest {
     @RepeatedTest(10)
     public void testNotQuery() {
         QueryProxy<Bson> nativeQuery = buildNativeQuery();
-        assertThat(mongoDBQueryFactory.build(nativeQuery.reverse()), equalTo(Filters.not(nativeQuery.getNativeQuery())));
+        assertThat(mongoDBQueryFactory.build(nativeQuery.reverse()), equalTo(Filters.nor(nativeQuery.getNativeQuery())));
     }
 
     @RepeatedTest(10)
@@ -192,7 +192,7 @@ public class MongoDBQueryFactoryTest {
         QueryProxy<Bson> nativeQuery1 = buildNativeQuery();
         QueryProxy<Bson> nativeQuery2 = buildNativeQuery();
         assertThat(mongoDBQueryFactory.build(nativeQuery1.and(nativeQuery2.reverse())),
-                equalTo(Filters.and(nativeQuery1.getNativeQuery(), Filters.not(nativeQuery2.getNativeQuery()))));
+                equalTo(Filters.and(nativeQuery1.getNativeQuery(), Filters.nor(nativeQuery2.getNativeQuery()))));
     }
 
     @RepeatedTest(10)
@@ -200,7 +200,7 @@ public class MongoDBQueryFactoryTest {
         QueryProxy<Bson> nativeQuery1 = buildNativeQuery();
         QueryProxy<Bson> nativeQuery2 = buildNativeQuery();
         assertThat(mongoDBQueryFactory.build(nativeQuery1.reverse().or(nativeQuery2.reverse())),
-                equalTo(Filters.or(Filters.not(nativeQuery1.getNativeQuery()), Filters.not(nativeQuery2.getNativeQuery()))));
+                equalTo(Filters.or(Filters.nor(nativeQuery1.getNativeQuery()), Filters.nor(nativeQuery2.getNativeQuery()))));
     }
 
     @RepeatedTest(10)
@@ -209,7 +209,7 @@ public class MongoDBQueryFactoryTest {
         QueryProxy<Bson> nativeQuery2 = buildNativeQuery();
         QueryProxy<Bson> nativeQuery3 = buildNativeQuery();
         QueryProxy<Bson> queryProxy = nativeQuery1.or(nativeQuery2.reverse()).reverse().and(nativeQuery3);
-        Bson expectedQuery = Filters.and(Filters.and(Filters.not(nativeQuery1.getNativeQuery()), nativeQuery2.getNativeQuery()), nativeQuery3.getNativeQuery());
+        Bson expectedQuery = Filters.and(Filters.and(Filters.nor(nativeQuery1.getNativeQuery()), nativeQuery2.getNativeQuery()), nativeQuery3.getNativeQuery());
         assertThat(mongoDBQueryFactory.build(queryProxy), equalTo(expectedQuery));
     }
 
@@ -241,6 +241,11 @@ public class MongoDBQueryFactoryTest {
                 MongoDBFieldOption.builder().fieldName("test").operator("test").build()
         ));
         Assertions.assertThrows(Exception.class, mongoDBQueryFactory::build);
+    }
+
+    @Test
+    public void optionCantBeNull() {
+        Assertions.assertThrows(NullPointerException.class, () -> new MongoDBQueryFactory(null));
     }
 
     @Test

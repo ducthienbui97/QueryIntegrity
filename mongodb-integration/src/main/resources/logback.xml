@@ -4,7 +4,8 @@
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
-    <root level="INFO">
+    <logger name="org.mongodb.driver" level="INFO"/>
+    <root level="${logLevel:-INFO}">
         <appender-ref ref="STDOUT"/>
     </root>
 </configuration>
