@@ -6,7 +6,7 @@ This module provides testing service as well as interfaces to generate queries a
 <dependency>
     <groupId>io.github.ducthienbui97</groupId>
     <artifactId>query-integrity-core</artifactId> 
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
 </dependency>
 ```
 
