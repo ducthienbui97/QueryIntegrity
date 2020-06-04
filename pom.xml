@@ -8,7 +8,7 @@
     <description>Framework to create and run tests on software using Metamorphic Testing</description>
     <artifactId>query-integrity</artifactId>
     <packaging>pom</packaging>
-    <version>1.0</version>
+    <version>1.1-SNAPSHOT</version>
     <modules>
         <module>query-integrity-core</module>
         <module>mongodb-integration</module>
@@ -17,7 +17,7 @@
         <connection>scm:git:git://github.com/ducthienbui97/QueryIntegrity.git</connection>
         <developerConnection>scm:git:git@github.com:ducthienbui97/QueryIntegrity.git</developerConnection>
         <url>https://github.com/ducthienbui97/QueryIntegrity</url>
-        <tag>HEAD</tag>
+        <tag>${project.version}</tag>
     </scm>
     <url>https://github.com/ducthienbui97/QueryIntegrity/</url>
     <licenses>
