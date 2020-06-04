@@ -3,8 +3,9 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>io.github.ducthienbui97</groupId>
+    <name>Query Integrity</name>
+    <description>Framework to create and run tests on software using Metamorphic Testing</description>
     <artifactId>query-integrity</artifactId>
     <packaging>pom</packaging>
     <version>1.0</version>
@@ -12,6 +13,12 @@
         <module>query-integrity-core</module>
         <module>mongodb-integration</module>
     </modules>
+    <scm>
+        <connection>scm:git:git://github.com/ducthienbui97/QueryIntegrity.git</connection>
+        <developerConnection>scm:git:git@github.com:ducthienbui97/QueryIntegrity.git</developerConnection>
+        <url>https://github.com/ducthienbui97/QueryIntegrity</url>
+        <tag>HEAD</tag>
+    </scm>
     <url>https://github.com/ducthienbui97/QueryIntegrity/</url>
     <licenses>
         <license>
