@@ -9,6 +9,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Proxy query data that is understood by {@link QueryTestingService}.
+ *
+ * @param <T> Query type
+ */
 @Data
 @Builder
 public class QueryProxy<T> {

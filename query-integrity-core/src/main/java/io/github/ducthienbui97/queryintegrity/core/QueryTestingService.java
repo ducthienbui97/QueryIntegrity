@@ -8,6 +8,12 @@ import java.util.Random;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+/**
+ * QueryTestingService randomly generate multiple tests on a system to find out any violation of metamorphic relations.
+ *
+ * @param <T> class of query used to the system under test.
+ * @param <R> class of result used for the system under test.
+ */
 @Slf4j
 public class QueryTestingService<T, R> {
     public final int DEFAULT_TEST_COUNT = 100;

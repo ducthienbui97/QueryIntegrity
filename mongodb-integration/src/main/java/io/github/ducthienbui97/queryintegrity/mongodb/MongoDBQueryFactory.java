@@ -246,4 +246,16 @@ public class MongoDBQueryFactory implements QueryFactory<Bson, Document> {
         log.debug("Sending {}", query);
         return Lists.newArrayList(collection.find(query));
     }
+
+    @Override
+    public String toString(Object resultOrQuery) {
+        if (resultOrQuery instanceof Collection) {
+            return ((Collection<Document>) resultOrQuery)
+                    .stream()
+                    .map(data -> data.get("_id"))
+                    .collect(Collectors.toList())
+                    .toString();
+        }
+        return resultOrQuery.toString();
+    }
 }
