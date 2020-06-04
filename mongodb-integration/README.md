@@ -1,12 +1,12 @@
-# mongodbintegration
+# mongodb-integration
 
 This module provides an implementation of query integrity check for mongodb server.
 
 ```xml
 <dependency>
     <groupId>io.github.ducthienbui97</groupId>
-    <artifactId>mongodbintegration</artifactId> 
-    <version>1.0SNAPSHOT</version>
+    <artifactId>mongodb-integration</artifactId> 
+    <version>1.0</version>
 </dependency>
 ```
 
