@@ -12,7 +12,7 @@
         <module>query-integrity-core</module>
         <module>mongodb-integration</module>
     </modules>
-    <url>https://github.com/ducthienbui97/</url>
+    <url>https://github.com/ducthienbui97/QueryIntegrity/</url>
     <licenses>
         <license>
             <name>MIT License</name>
