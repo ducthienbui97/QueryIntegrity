@@ -45,7 +45,7 @@ Run queryintegrity test in your MongoDB deployment.
   -f, --file=<configFile>    Json configure file.
   -n, --not, --notTest       Run not test.
   -s, --subset, --subsetTest Run subset test.
-      seed=<seed>          Random seed.
+     --seed=<seed>          Random seed.
   -u, --url, --connection=<connectionString>
                              Connection string name.
 ````
