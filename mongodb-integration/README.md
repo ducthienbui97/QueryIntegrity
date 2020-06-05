@@ -35,7 +35,7 @@ Implementation of a simple command line interface program to run query integrity
 ````
 Usage: MongoDB Query Testing service [ens] -c=<collectionName>
                                      -db=<databaseName> -f=<configFile>
-                                     [-seed=<seed>] -u=<connectionString>
+                                     [--seed=<seed>] -u=<connectionString>
 Run queryintegrity test in your MongoDB deployment.
   -c, --collection=<collectionName>
                              Collection name.
