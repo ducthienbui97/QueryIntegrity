@@ -16,9 +16,9 @@ import java.util.function.Function;
  */
 @Slf4j
 public class QueryTestingService<T, R> {
-    public final int DEFAULT_TEST_COUNT = 100;
-    public final int DEFAULT_MAX_LEAF = 5;
-    public final int DEFAULT_MIN_LEAF = 1;
+    public static final int DEFAULT_TEST_COUNT = 100;
+    public static final int DEFAULT_MAX_LEAF = 5;
+    public static final int DEFAULT_MIN_LEAF = 1;
     private final QueryFactory<T, R> queryFactory;
     private final ResultValidator<R> resultValidator;
     private final Random random = new Random();

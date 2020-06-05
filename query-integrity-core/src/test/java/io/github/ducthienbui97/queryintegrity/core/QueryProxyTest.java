@@ -79,6 +79,12 @@ public class QueryProxyTest {
     }
 
     @ParameterizedTest
+    @MethodSource("queryProvider")
+    public void reverseQueryShouldNotBeOriginalQuery(QueryProxy<String> queryProxy) {
+        assertThat(queryProxy, not(equalTo(queryProxy.reverse())));
+    }
+
+    @ParameterizedTest
     @MethodSource("pairQueryProvider")
     public void andQueryShouldAndOf2OriginalQuery(QueryProxy<String> query1, QueryProxy<String> query2) {
         QueryProxy<String> andQuery = query1.and(query2);
