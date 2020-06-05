@@ -14,8 +14,8 @@ import io.github.ducthienbui97.queryintegrity.core.QueryTestingService;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -40,9 +40,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class MongoDBQueryTestingCLITest {
     private static final String DATABASE_NAME = "testDb";
     private static final String COLLECTION_NAME = "testCollectionName";
-    private MongoServer mongoServer;
-    private String mongoURI;
-    private String jsonFilePath;
+    private static MongoServer mongoServer;
+    private static String mongoURI;
+    private static String jsonFilePath;
 
     private static Stream<Arguments> parameterFormats() {
         return databaseFormats().flatMap(database -> collectionFormats().flatMap(collection ->
@@ -284,21 +284,20 @@ public class MongoDBQueryTestingCLITest {
         };
     }
 
-    @BeforeEach
-    public void initializeMongoServer() {
+    @BeforeAll
+    public static void initializeMongoServer() {
         mongoServer = new MongoServer(new MemoryBackend());
         InetSocketAddress address = mongoServer.bind();
         mongoURI = "mongodb://" + address.getHostName() + ":" + address.getPort() + "/";
     }
-  
-    @AfterEach
-    public void pullDown() {
+
+    @AfterAll
+    public static void pullDown() {
         mongoServer.shutdown();
-        mongoServer = null;
     }
 
-    @BeforeEach
-    public void writeJsonFile() throws IOException {
+    @BeforeAll
+    public static void writeJsonFile() throws IOException {
         File jsonFile = File.createTempFile("json", ".json");
         jsonFile.deleteOnExit();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -307,7 +306,7 @@ public class MongoDBQueryTestingCLITest {
         jsonFilePath = jsonFile.getPath();
     }
 
-    private Map<String, Map<String, Collection<Collection<Object>>>> fieldOptions() {
+    private static Map<String, Map<String, Collection<Collection<Object>>>> fieldOptions() {
         return ImmutableMap.of(
                 "text", ImmutableMap.of(
                         "regex", singletonList(singletonList("tes.*")),

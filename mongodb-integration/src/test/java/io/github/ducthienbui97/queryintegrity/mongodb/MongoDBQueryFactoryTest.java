@@ -17,10 +17,7 @@ import org.bson.conversions.Bson;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.RepeatedTest;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -42,7 +39,7 @@ public class MongoDBQueryFactoryTest {
     private static final String DATABASE_NAME = "testDb";
     private static final String COLLECTION_NAME = "testCollectionName";
     private static final Instant NOW = Instant.now();
-    private final List<Map<String, Object>> testData = ImmutableList.of(
+    private static final List<Map<String, Object>> TEST_DATA = ImmutableList.of(
             ImmutableMap.of(
                     "date", NOW.minus(Period.ofDays(1)),
                     "text", "text1",
@@ -65,7 +62,7 @@ public class MongoDBQueryFactoryTest {
                     "array", ImmutableList.of("a", "b", "c")
             )
     );
-    private MongoServer mongoServer;
+    private static MongoServer mongoServer;
     private MongoDBQueryFactory mongoDBQueryFactory;
 
     public static List<MongoDBFieldOption> fieldNameWithFilterOption() {
@@ -99,12 +96,11 @@ public class MongoDBQueryFactoryTest {
 
     @BeforeEach
     public void setup() {
-        initializeMongoServer();
         mongoDBQueryFactory = new MongoDBQueryFactory(buildFactoryOption());
     }
 
-    @AfterEach
-    public void pullDown() {
+    @AfterAll
+    public static void pullDown() {
         mongoServer.shutdown();
         mongoServer = null;
     }
@@ -365,18 +361,16 @@ public class MongoDBQueryFactoryTest {
                 .build();
     }
 
-    private Matcher<Document> inTestData() {
-        return new TypeSafeMatcher<Document>() {
-            @Override
-            protected boolean matchesSafely(Document document) {
-                return hasItem(matchDocument(document)).matches(testData);
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendText("Test dataset has item");
-            }
-        };
+    @BeforeAll
+    public static void initializeMongoServer() {
+        val backend = new Backend();
+        val database = backend.resolveDatabase(DATABASE_NAME);
+        val collection = database.createCollectionOrThrowIfExists(COLLECTION_NAME, CollectionOptions.withDefaults());
+        for (Map<String, Object> data : TEST_DATA) {
+            collection.addDocument(new de.bwaldvogel.mongo.bson.Document(data));
+        }
+        mongoServer = new MongoServer(backend);
+        mongoServer.bind();
     }
 
     private Matcher<Map<String, Object>> matchDocument(Document document) {
@@ -412,15 +406,18 @@ public class MongoDBQueryFactoryTest {
         };
     }
 
-    private void initializeMongoServer() {
-        val backend = new Backend();
-        val database = backend.resolveDatabase(DATABASE_NAME);
-        val collection = database.createCollectionOrThrowIfExists(COLLECTION_NAME, CollectionOptions.withDefaults());
-        for (Map<String, Object> data : testData) {
-            collection.addDocument(new de.bwaldvogel.mongo.bson.Document(data));
-        }
-        mongoServer = new MongoServer(backend);
-        mongoServer.bind();
+    private Matcher<Document> inTestData() {
+        return new TypeSafeMatcher<Document>() {
+            @Override
+            protected boolean matchesSafely(Document document) {
+                return hasItem(matchDocument(document)).matches(TEST_DATA);
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("Test dataset has item");
+            }
+        };
     }
 
     private MongoDBQueryFactoryOptions buildFactoryOption() {
