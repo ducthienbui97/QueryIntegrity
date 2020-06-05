@@ -17,7 +17,10 @@ import org.bson.conversions.Bson;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -32,6 +35,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Slf4j
 public class MongoDBQueryFactoryTest {
@@ -102,6 +106,7 @@ public class MongoDBQueryFactoryTest {
     @AfterEach
     public void pullDown() {
         mongoServer.shutdown();
+        mongoServer = null;
     }
 
     @ParameterizedTest
@@ -154,6 +159,23 @@ public class MongoDBQueryFactoryTest {
                 hasItem(fieldOption.getParameters()));
     }
 
+
+    @SneakyThrows
+    @Test
+    public void testFieldFilterSetupFromURLFailIfFormatNotCorrect() {
+        File jsonFile = File.createTempFile("json", ".json");
+        jsonFile.deleteOnExit();
+        assertThrows(Exception.class, () -> mongoDBQueryFactory.setFieldFilterOptions(jsonFile.toURI().toURL()));
+    }
+
+    @SneakyThrows
+    @Test
+    public void testFieldFilterSetupFromFileFailIfFormatNotCorrect() {
+        File jsonFile = File.createTempFile("json", ".json");
+        jsonFile.deleteOnExit();
+        assertThrows(Exception.class, () -> mongoDBQueryFactory.setFieldFilterOptions(jsonFile));
+    }
+
     @ParameterizedTest
     @MethodSource("fieldNameWithFilterOption")
     public void testQueryBuilderWithCorrectOperatorAndFieldName(MongoDBFieldOption fieldOption) {
@@ -164,6 +186,25 @@ public class MongoDBQueryFactoryTest {
                 .or(containsString("BsonRegularExpression")));
     }
 
+    @RepeatedTest(100)
+    public void testBuildQueryInQueryList() {
+        List<MongoDBFieldOption> fieldOptions = fieldNameWithFilterOption();
+        Bson query = mongoDBQueryFactory.build();
+        assertThat(fieldOptions, hasItem(new TypeSafeMatcher<MongoDBFieldOption>() {
+            @Override
+            protected boolean matchesSafely(MongoDBFieldOption fieldOption) {
+                return allOf(containsString(String.format("fieldName='%s'", fieldOption.getFieldName())),
+                        either(containsString(String.format("operator='$%s'", fieldOption.getOperator())))
+                                .or(containsString("BsonRegularExpression"))).matches(query.toString());
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("Match ").appendValue(query);
+            }
+        }));
+    }
+
     @ParameterizedTest
     @MethodSource("fieldNameWithFilterOption")
     public void testResultShouldReturnItemInTestData(MongoDBFieldOption fieldOption) {
@@ -172,22 +213,66 @@ public class MongoDBQueryFactoryTest {
         Collection<Document> result = mongoDBQueryFactory.getResult(query);
         log.info("Result for {} is {}", query, result);
         assertThat(result, everyItem(inTestData()));
-        assertThat(result.isEmpty(), is(false));
     }
 
-    @RepeatedTest(10)
+    @RepeatedTest(100)
+    public void testAndQueryResultShouldReturnItemInTestData() {
+        QueryProxy<Bson> nativeQuery1 = buildNativeQuery();
+        QueryProxy<Bson> nativeQuery2 = buildNativeQuery();
+        QueryProxy<Bson> nativeQuery3 = buildNativeQuery();
+        QueryProxy<Bson> queryProxy = nativeQuery1.or(nativeQuery2.reverse()).reverse().and(nativeQuery3);
+        Bson query = mongoDBQueryFactory.build(queryProxy);
+        Collection<Document> result = mongoDBQueryFactory.getResult(query);
+        log.info("Result for {} is {}", query, result);
+        assertThat(result, everyItem(inTestData()));
+    }
+
+    @RepeatedTest(100)
+    public void testNotQueryResultShouldReturnItemInTestData() {
+        QueryProxy<Bson> nativeQuery1 = buildNativeQuery();
+        QueryProxy<Bson> nativeQuery2 = buildNativeQuery();
+        QueryProxy<Bson> nativeQuery3 = buildNativeQuery();
+        QueryProxy<Bson> queryProxy = nativeQuery1.or(nativeQuery2).and(nativeQuery3).reverse();
+        Bson query = mongoDBQueryFactory.build(queryProxy);
+        Collection<Document> result = mongoDBQueryFactory.getResult(query);
+        log.info("Result for {} is {}", query, result);
+        assertThat(result, everyItem(inTestData()));
+    }
+
+    @RepeatedTest(100)
+    public void testOrQueryResultShouldReturnItemInTestData() {
+        QueryProxy<Bson> nativeQuery1 = buildNativeQuery();
+        QueryProxy<Bson> nativeQuery2 = buildNativeQuery();
+        QueryProxy<Bson> nativeQuery3 = buildNativeQuery();
+        QueryProxy<Bson> queryProxy = nativeQuery1.and(nativeQuery2.reverse()).or(nativeQuery3);
+        Bson query = mongoDBQueryFactory.build(queryProxy);
+        Collection<Document> result = mongoDBQueryFactory.getResult(query);
+        log.info("Result for {} is {}", query, result);
+        assertThat(result, everyItem(inTestData()));
+    }
+
+    @RepeatedTest(100)
+    public void testToStringContainsOutputIds() {
+        Bson query = mongoDBQueryFactory.build();
+        Collection<Document> result = mongoDBQueryFactory.getResult(query);
+        log.info("Result for {} is {}", query, result);
+        result.forEach(data -> assertThat(mongoDBQueryFactory.toString(result),
+                containsString(data.getObjectId("_id").toString())));
+    }
+
+    @RepeatedTest(100)
     public void testNativeQuery() {
         QueryProxy<Bson> queryProxy = buildNativeQuery();
         assertThat(mongoDBQueryFactory.build(queryProxy), equalTo(queryProxy.getNativeQuery()));
     }
 
-    @RepeatedTest(10)
+    @RepeatedTest(100)
     public void testNotQuery() {
         QueryProxy<Bson> nativeQuery = buildNativeQuery();
         assertThat(mongoDBQueryFactory.build(nativeQuery.reverse()), equalTo(Filters.nor(nativeQuery.getNativeQuery())));
     }
 
-    @RepeatedTest(10)
+    @RepeatedTest(100)
     public void testAndQuery() {
         QueryProxy<Bson> nativeQuery1 = buildNativeQuery();
         QueryProxy<Bson> nativeQuery2 = buildNativeQuery();
@@ -195,7 +280,7 @@ public class MongoDBQueryFactoryTest {
                 equalTo(Filters.and(nativeQuery1.getNativeQuery(), Filters.nor(nativeQuery2.getNativeQuery()))));
     }
 
-    @RepeatedTest(10)
+    @RepeatedTest(100)
     public void testOrQuery() {
         QueryProxy<Bson> nativeQuery1 = buildNativeQuery();
         QueryProxy<Bson> nativeQuery2 = buildNativeQuery();
@@ -203,7 +288,7 @@ public class MongoDBQueryFactoryTest {
                 equalTo(Filters.or(Filters.nor(nativeQuery1.getNativeQuery()), Filters.nor(nativeQuery2.getNativeQuery()))));
     }
 
-    @RepeatedTest(10)
+    @RepeatedTest(100)
     public void testComplexQuery() {
         QueryProxy<Bson> nativeQuery1 = buildNativeQuery();
         QueryProxy<Bson> nativeQuery2 = buildNativeQuery();
@@ -240,42 +325,37 @@ public class MongoDBQueryFactoryTest {
         mongoDBQueryFactory.setFieldFilterOptions(ImmutableList.of(
                 MongoDBFieldOption.builder().fieldName("test").operator("test").build()
         ));
-        Assertions.assertThrows(Exception.class, mongoDBQueryFactory::build);
+        assertThrows(Exception.class, mongoDBQueryFactory::build);
     }
 
     @Test
     public void optionCantBeNull() {
-        Assertions.assertThrows(NullPointerException.class, () -> new MongoDBQueryFactory(null));
+        assertThrows(NullPointerException.class, () -> new MongoDBQueryFactory(null));
     }
 
     @Test
     public void connectionStringCantBeNull() {
         val option = buildFactoryOption();
-        Assertions.assertThrows(NullPointerException.class, () -> new MongoDBQueryFactory(null, option.getDatabaseName(), option.getCollectionName(), option.getFieldOptions(), option.getSeed()));
+        assertThrows(NullPointerException.class, () -> new MongoDBQueryFactory(null, option.getDatabaseName(), option.getCollectionName(), option.getFieldOptions(), option.getSeed()));
     }
 
     @Test
     public void dbNameCantBeNull() {
         val option = buildFactoryOption();
-        Assertions.assertThrows(NullPointerException.class, () -> new MongoDBQueryFactory(option.getConnectionString(), null, option.getCollectionName(), option.getFieldOptions(), option.getSeed()));
+        assertThrows(NullPointerException.class, () -> new MongoDBQueryFactory(option.getConnectionString(), null, option.getCollectionName(), option.getFieldOptions(), option.getSeed()));
     }
 
     @Test
     public void collectionNameCantBeNull() {
         val option = buildFactoryOption();
-        Assertions.assertThrows(NullPointerException.class, () -> new MongoDBQueryFactory(option.getConnectionString(), option.getCollectionName(), null, option.getFieldOptions(), option.getSeed()));
+        assertThrows(NullPointerException.class, () -> new MongoDBQueryFactory(option.getConnectionString(), option.getCollectionName(), null, option.getFieldOptions(), option.getSeed()));
     }
 
     @Test
     public void fieldOptionCantBeNullWhenBuildIsCalled() {
         val option = buildFactoryOption();
         mongoDBQueryFactory = new MongoDBQueryFactory(option.getConnectionString(), option.getCollectionName(), option.getCollectionName(), null, option.getSeed());
-        Assertions.assertThrows(NullPointerException.class, () -> mongoDBQueryFactory.build());
-    }
-
-    @Test
-    public void canCreateFactoryWithNullConstructor() {
-        Assertions.assertThrows(NullPointerException.class, () -> new MongoDBQueryFactory(null));
+        assertThrows(NullPointerException.class, () -> mongoDBQueryFactory.build());
     }
 
     private QueryProxy<Bson> buildNativeQuery() {
