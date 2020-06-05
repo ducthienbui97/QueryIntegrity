@@ -290,12 +290,7 @@ public class MongoDBQueryTestingCLITest {
         InetSocketAddress address = mongoServer.bind();
         mongoURI = "mongodb://" + address.getHostName() + ":" + address.getPort() + "/";
     }
-
-    @BeforeEach()
-    public void turnOffLogger() {
-        ((Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).setLevel(Level.OFF);
-    }
-
+  
     @AfterEach
     public void pullDown() {
         mongoServer.shutdown();
