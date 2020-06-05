@@ -33,19 +33,19 @@ The query random configuration is in the following structure:
 
 Implementation of a simple command line interface program to run query integrity check on a mongodb server:
 ````
-Usage: MongoDB Query Testing service [ens] c=<collectionName>
-                                     db=<databaseName> f=<configFile>
-                                     [seed=<seed>] u=<connectionString>
+Usage: MongoDB Query Testing service [ens] -c=<collectionName>
+                                     -db=<databaseName> -f=<configFile>
+                                     [-seed=<seed>] -u=<connectionString>
 Run queryintegrity test in your MongoDB deployment.
-  c, collection=<collectionName>
+  -c, --collection=<collectionName>
                              Collection name.
-  db, database=<databaseName>
+  -db, --database=<databaseName>
                              Database name.
-  e, equal, equalTest   Run equal test.
-  f, file=<configFile>    Json configure file.
-  n, not, notTest       Run not test.
-  s, subset, subsetTest Run subset test.
+  -e, --equal, --equalTest   Run equal test.
+  -f, --file=<configFile>    Json configure file.
+  -n, --not, --notTest       Run not test.
+  -s, --subset, --subsetTest Run subset test.
       seed=<seed>          Random seed.
-  u, url, connection=<connectionString>
+  -u, --url, --connection=<connectionString>
                              Connection string name.
 ````
