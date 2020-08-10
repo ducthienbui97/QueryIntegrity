@@ -3,6 +3,8 @@ Query Integrity is framework to create and run tests on software using [Metamorp
 The main purpose of the tool is to automatically test and find inconsistency of data query result in order to find bugs 
 and problems in data retrieving related features of software.
 
+This library is originally developed for CSIT314's group assessment at University of Wollongong
+
 ## The idea
 
 In any data retrieving system, the relation between the result of any 2 queries should be logically corrected 
